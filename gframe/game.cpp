@@ -48,19 +48,19 @@ bool Game::Initialize() {
 	memset(chatTiming, 0, sizeof(chatTiming));
 	for(int i = 0; i < 2048; ++i)
  		dataManager._sysStrings[i] = 0;
-	deckManager.LoadLFList();
+	deckManager.LoadLFList();//加载禁卡表
 	driver = device->getVideoDriver();
 	driver->setTextureCreationFlag(irr::video::ETCF_CREATE_MIP_MAPS, false);
 	driver->setTextureCreationFlag(irr::video::ETCF_OPTIMIZED_FOR_QUALITY, true);
 	imageManager.SetDevice(device);
-	if(!imageManager.Initial())
+	if(!imageManager.Initial())//
 		return false;
-	if(!dataManager.LoadDB("cards.cdb"))
+	if(!dataManager.LoadDB("cards.cdb"))//载入卡片数据库
 		return false;
-	if(!dataManager.LoadStrings("strings.conf"))
+	if(!dataManager.LoadStrings("strings.conf"))//加载系统字符串集合
 		return false;
 	RefreshExpansionDB();
-	dataManager.LoadStrings("./expansions/strings.conf");
+	dataManager.LoadStrings("./expansions/strings.conf");//加载扩展字符串集合
 	env = device->getGUIEnvironment();
 	numFont = irr::gui::CGUITTFont::createTTFont(env, gameConf.numfont, 16);
 	adFont = irr::gui::CGUITTFont::createTTFont(env, gameConf.numfont, 12);
@@ -852,7 +852,7 @@ void Game::RefreshSingleplay() {
 	closedir(dir);
 #endif
 }
-void Game::LoadConfig() {
+void Game::LoadConfig() {//加载配置
 	FILE* fp = fopen("system.conf", "r");
 	if(!fp)
 		return;
@@ -954,7 +954,7 @@ void Game::LoadConfig() {
 	}
 	fclose(fp);
 }
-void Game::SaveConfig() {
+void Game::SaveConfig() {//保存配置
 	FILE* fp = fopen("system.conf", "w");
 	fprintf(fp, "#config file\n#nickname & gamename should be less than 20 characters\n");
 	char linebuf[256];

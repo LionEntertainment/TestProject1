@@ -15,8 +15,9 @@ solution "ygo"
 
     configuration "macosx"
         defines { "LUA_USE_MACOSX" }
-        includedirs { "/opt/local/include" }
-        libdirs { "/opt/local/lib" }
+		includedirs { "/usr/local/include", "/usr/local/include/freetype2", "/usr/local/include/irrlicht" }  
+		libdirs { "/usr/local/lib" }
+		linkoptions { "-framework OpenGL" }
 
     configuration "linux"
         defines { "LUA_USE_LINUX" }
@@ -49,11 +50,11 @@ solution "ygo"
         targetdir "bin/release"
 
     include "ocgcore"
-    include "gframe"
+    include "gframe"   
+	include "lua"
+	include "sqlite3"
     if os.is("windows") then
     include "event"
     include "freetype"
     include "irrlicht"
-    include "lua"
-    include "sqlite3"
     end

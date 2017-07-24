@@ -12,17 +12,17 @@
 namespace ygo {
 
 struct Config {
-	bool use_d3d;
+	bool use_d3d;//是否使用d3d库渲染
 	unsigned short antialias;
-	unsigned short serverport;
-	unsigned char textfontsize;
+	unsigned short serverport;//服务器端口
+	unsigned char textfontsize;//字体大小
 	wchar_t lastip[20];
 	wchar_t lastport[10];
-	wchar_t nickname[20];
-	wchar_t gamename[20];
+	wchar_t nickname[20];//用户名
+	wchar_t gamename[20];//游戏名
 	wchar_t lastdeck[64];
-	wchar_t textfont[256];
-	wchar_t numfont[256];
+	wchar_t textfont[256];//文字字体
+	wchar_t numfont[256];//数字字体
 	wchar_t roompass[20];
 	//settings
 	int chkAutoPos;
@@ -122,7 +122,7 @@ public:
 	Signal singleSignal;
 	Signal closeSignal;
 	Signal closeDoneSignal;
-	Config gameConf;
+	Config gameConf; //游戏配置对象
 	DuelInfo dInfo;
 
 	std::list<FadingUnit> fadingList;

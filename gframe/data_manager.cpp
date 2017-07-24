@@ -1,22 +1,34 @@
 #include "data_manager.h"
 #include <stdio.h>
+#include <locale.h>
 
 namespace ygo {
 
 const wchar_t* DataManager::unknown_string = L"???";
 wchar_t DataManager::strBuffer[4096];
 DataManager dataManager;
-
+/*
+ * 读取数据库信息，并保存在缓存中
+ */
 bool DataManager::LoadDB(const char* file) {
-	sqlite3* pDB;
-	if(sqlite3_open(file, &pDB) != SQLITE_OK)
+	//------------------添加代码获取数据库信息-----------
+	setlocale(LC_CTYPE, "chs");
+	FILE* fp;
+	fp = fopen("info.txt", "w");
+	wchar_t strBufferTmp[4096] = {0};
+	int counter = 0;
+	//---------------------------------------------------
+	sqlite3* pDB; // 数据库指针
+	if(sqlite3_open(file, &pDB) != SQLITE_OK) // 打开数据库文件
 		return Error(pDB);
+	// 通过数据库指针和sql语句创建sqlite3_stmt指针
 	sqlite3_stmt* pStmt;
 	const char* sql = "select * from datas,texts where datas.id=texts.id";
 	if(sqlite3_prepare_v2(pDB, sql, -1, &pStmt, 0) != SQLITE_OK)
 		return Error(pDB);
-	CardDataC cd;
-	CardString cs;
+	//--------------------------------------------
+	CardDataC cd; // 存储卡片数据的结构体对象
+	CardString cs; // 卡片文字信息结构体包括卡片名、卡片描述等信息、关键字等
 	for(int i = 0; i < 16; ++i) cs.desc[i] = 0;
 	int step = 0, len = 0;
 	do {
@@ -24,6 +36,8 @@ bool DataManager::LoadDB(const char* file) {
 		if(step == SQLITE_BUSY || step == SQLITE_ERROR || step == SQLITE_MISUSE)
 			return Error(pDB, pStmt);
 		else if(step == SQLITE_ROW) {
+			counter++;
+
 			cd.code = sqlite3_column_int(pStmt, 0);
 			cd.ot = sqlite3_column_int(pStmt, 1);
 			cd.alias = sqlite3_column_int(pStmt, 2);
@@ -38,16 +52,27 @@ bool DataManager::LoadDB(const char* file) {
 			cd.race = sqlite3_column_int(pStmt, 8);
 			cd.attribute = sqlite3_column_int(pStmt, 9);
 			cd.category = sqlite3_column_int(pStmt, 10);
-			_datas.insert(std::make_pair(cd.code, cd));
+			_datas.insert(std::make_pair(cd.code, cd)); // 卡片数据保存缓存中
+			//------------------添加代码获取数据库信息-----------
+			fwprintf(fp,L"%d:\ncode:%d,ot:%d,alias:%d,setcode:%d,type:%d,attack:%d,defense:%d,level:%d,race:%d,attribute:%d,category:%d",
+				counter,cd.code,cd.ot,cd.alias,cd.setcode,cd.type,cd.attack,cd.defense,cd.level,cd.race,cd.attribute,cd.category);
+			//---------------------------------------------------
+
 			len = BufferIO::DecodeUTF8((const char*)sqlite3_column_text(pStmt, 12), strBuffer);
 			if(len) {
 				cs.name = new wchar_t[len + 1];
 				memcpy(cs.name, strBuffer, (len + 1)*sizeof(wchar_t));
+				//------------------添加代码获取数据库信息-----------
+				fwprintf(fp, L",name:%s",cs.name);
+				//---------------------------------------------------
 			} else cs.name = 0;
 			len = BufferIO::DecodeUTF8((const char*)sqlite3_column_text(pStmt, 13), strBuffer);
 			if(len) {
 				cs.text = new wchar_t[len + 1];
 				memcpy(cs.text, strBuffer, (len + 1)*sizeof(wchar_t));
+				//------------------添加代码获取数据库信息-----------
+				fwprintf(fp, L",text:%s", cs.text);
+				//---------------------------------------------------
 			} else {
 				cs.text = new wchar_t[1];
 				cs.text[0] = 0;
@@ -57,13 +82,22 @@ bool DataManager::LoadDB(const char* file) {
 				if(len) {
 					cs.desc[i - 14] = new wchar_t[len + 1];
 					memcpy(cs.desc[i - 14], strBuffer, (len + 1)*sizeof(wchar_t));
+					//------------------添加代码获取数据库信息-----------
+					fwprintf(fp, L",desc%d:%s", i - 13,cs.desc[i - 14]);
+					//---------------------------------------------------
 				} else cs.desc[i - 14] = 0;
 			}
-			_strings.insert(std::make_pair(cd.code, cs));
+			_strings.insert(std::make_pair(cd.code, cs)); // 卡片描述信息保存到缓存中
+			//------------------添加代码获取数据库信息-----------
+			fprintf(fp, "\n");
+			//---------------------------------------------------
 		}
 	} while(step != SQLITE_DONE);
 	sqlite3_finalize(pStmt);
 	sqlite3_close(pDB);
+	//------------------添加代码获取数据库信息-----------
+	fclose(fp);
+	//---------------------------------------------------
 	return true;
 }
 bool DataManager::LoadStrings(const char* file) {
